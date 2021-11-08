@@ -1,0 +1,45 @@
+service: todo-list-web
+
+plugins:
+  - serverless-s3-deploy
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+
+custom:
+  bucket: "todo-list-web-${aws:accountId}-${self:provider.region}-${self:provider.stage}"
+  assets:
+    resolveReferences: true
+    auto: true
+    targets:
+      - bucket:
+          !Ref Bucket
+        files:
+          - source: ./build
+            globs: '**/*.*'
+        empty: true
+
+distribution:
+  component: '@serverless/aws-cloudfront'
+  inputs:
+    region: ${self:provider.region}
+    enabled: true # optional
+    comment: 'Todo list App' # optional
+    defaults: # optional
+      ttl: 15
+      allowedHttpMethods: [ 'HEAD', 'GET' ]
+      viewerProtocolPolicy: 'https-only' # optional
+      smoothStreaming: true # optional
+      compress: true # optional
+      fieldLevelEncryptionId: '123' # optional
+    origins:
+      - https://${self:custom.bucket}.s3.amazonaws.com
+
+resources:
+  Resources:
+    Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucket}

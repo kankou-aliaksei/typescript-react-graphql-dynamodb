@@ -1,0 +1,88 @@
+scalar Long
+
+schema {
+  mutation: Mutation
+  query: Query
+  subscription: Subscription
+}
+
+input SaveItemInput {
+  name: String!
+  description: String
+}
+
+input Filter {
+  fromTs: Long
+  toTs: Long
+}
+
+input Page {
+  size: Int
+  startToken: String
+}
+
+input ListItemInput {
+  filter: Filter
+  page: Page
+}
+
+interface BaseOutput {
+  success: Boolean!
+  error: Error
+}
+
+type ItemDto {
+  id: ID!
+  name: String!
+  description: String
+  createdAt: Long!
+}
+
+type ItemOutput implements BaseOutput {
+  result: ItemDto
+  success: Boolean!
+  error: Error
+}
+
+type ListItemResult {
+  items: [ItemDto]
+  nextToken: String
+}
+
+type ListItemOutput implements BaseOutput {
+  result: ListItemResult
+  success: Boolean!
+  error: Error
+}
+
+type Error {
+  code: String!
+  message: String!
+}
+
+type ItemId {
+  id: String!
+}
+
+type DeleteItemOutput implements BaseOutput {
+  result: ItemId!
+  success: Boolean!
+  error: Error
+}
+
+type Mutation {
+  saveItem(input: SaveItemInput!): ItemOutput!
+  deleteItem(id: ID!): DeleteItemOutput!
+}
+
+type Query {
+  getItem(id: ID!): ItemOutput!
+  listItem(input: ListItemInput!): ListItemOutput!
+}
+
+type Subscription {
+  onSaveItem: ItemOutput
+  @aws_subscribe(mutations: ["saveItem"])
+  onDeleteItem: DeleteItemOutput
+  @aws_subscribe(mutations: ["deleteItem"])
+}

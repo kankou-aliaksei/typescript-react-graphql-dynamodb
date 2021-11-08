@@ -1,0 +1,146 @@
+service: todo-list-api
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs14.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  timeout: 60
+  memorySize: 256
+  environment:
+    ITEMS_DYNAMO_DB_TABLE: todo-list-items
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-stack-output
+  - serverless-appsync-plugin
+  - serverless-plugin-common-excludes
+  - serverless-plugin-include-dependencies
+  - serverless-iam-roles-per-function
+  - aws-amplify-serverless-plugin
+
+functions:
+  SaveItem:
+    handler: src/items/item.saveItem
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ITEMS_DYNAMO_DB_TABLE}
+  GetItem:
+    handler: src/items/item.getItem
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ITEMS_DYNAMO_DB_TABLE}
+  DeleteItem:
+    handler: src/items/item.deleteItem
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ITEMS_DYNAMO_DB_TABLE}
+  ListItem:
+    handler: src/items/item.listItem
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:provider.environment.ITEMS_DYNAMO_DB_TABLE}/index/createdAt-index
+
+custom:
+  output:
+    file: .serverless/output.json
+  amplify:
+    - filename: ../web/src/aws-exports.js
+      type: javascript
+      appClient: CognitoUserPoolClient
+      s3bucket: disabled
+  appSync:
+    - name: Api
+      authenticationType: AMAZON_COGNITO_USER_POOLS
+      userPoolConfig:
+        awsRegion: ${self:provider.region}
+        defaultAction: ALLOW
+        userPoolId: { Ref: CognitoUserPool }
+      logConfig:
+        level: ALL
+        excludeVerboseContent: false
+      defaultMappingTemplates:
+        response: default.response.vtl
+        request: default.request.vtl
+      mappingTemplates:
+        - dataSource: saveItem
+          type: Mutation
+          field: saveItem
+        - dataSource: deleteItem
+          type: Mutation
+          field: deleteItem
+        - dataSource: getItem
+          type: Query
+          field: getItem
+        - dataSource: listItem
+          type: Query
+          field: listItem
+      dataSources:
+        - type: 'AWS_LAMBDA'
+          name: 'saveItem'
+          config:
+            lambdaFunctionArn: !GetAtt SaveItemLambdaFunction.Arn
+        - type: 'AWS_LAMBDA'
+          name: 'deleteItem'
+          config:
+            lambdaFunctionArn: !GetAtt DeleteItemLambdaFunction.Arn
+        - type: 'AWS_LAMBDA'
+          name: 'getItem'
+          config:
+            lambdaFunctionArn: !GetAtt GetItemLambdaFunction.Arn
+        - type: 'AWS_LAMBDA'
+          name: 'listItem'
+          config:
+            lambdaFunctionArn: !GetAtt ListItemLambdaFunction.Arn
+
+resources:
+  Resources:
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:service}-${self:provider.stage}-user-pool
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+        UserPoolAddOns:
+          AdvancedSecurityMode: ENFORCED
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:service}-${self:provider.stage}-app-client
+        UserPoolId:
+          Ref: CognitoUserPool
+    GraphQlApiParameter:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /graphql/url
+        Type: String
+        Value:
+          Fn::GetAtt:
+          - ApiGraphQlApi
+          - GraphQLUrl
+    CognitoUserPoolParameter:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /cognito/user-pool/id
+        Type: String
+        Value:
+          !Ref CognitoUserPool
+    CognitoClientParameter:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /cognito/client/id
+        Type: String
+        Value:
+          !Ref CognitoUserPoolClient

@@ -1,0 +1,48 @@
+service: todo-list-dynamo-db
+
+custom:
+  dynamoDb:
+    table:
+      item:
+        readCapacityUnits: 1
+        writeCapacityUnits: 1
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  lambdaHashingVersion: 20201221
+  environment:
+    ITEMS_DYNAMO_DB_TABLE: todo-list-items
+
+resources:
+  Resources:
+    ItemsDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: entityName
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: N
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: ${self:custom.dynamoDb.table.item.readCapacityUnits}
+          WriteCapacityUnits: ${self:custom.dynamoDb.table.item.writeCapacityUnits}
+        TableName: ${self:provider.environment.ITEMS_DYNAMO_DB_TABLE}
+        GlobalSecondaryIndexes:
+          - IndexName: createdAt-index
+            KeySchema:
+              - AttributeName: entityName
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            ProvisionedThroughput:
+              ReadCapacityUnits: ${self:custom.dynamoDb.table.item.readCapacityUnits}
+              WriteCapacityUnits: ${self:custom.dynamoDb.table.item.writeCapacityUnits}
+            Projection:
+              ProjectionType: ALL

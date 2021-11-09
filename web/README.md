@@ -1,3 +1,7 @@
+# !!!
+
+## It's not production ready. It's just for test purposes.
+
 # Start locally
 ```
 npm i && npm run start
@@ -12,3 +16,6 @@ npm i && npm run build
 ```
 npm i && npm run build && npm run deploy
 ```
+
+# Note
+CloudFront Distribution has been deployed manually

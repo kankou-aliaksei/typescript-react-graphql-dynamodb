@@ -1,4 +1,4 @@
-import { ApiHandler, Request, Response } from '../../shared/api.interfaces';
+import { ApiHandler, Request, Response } from '../shared/api.interfaces';
 import { ItemConfig } from './item.config';
 import { ItemController } from './item.controller';
 import { DeleteItemInput, GetItemInput, ItemDto, ListItemInput } from './item.dto';

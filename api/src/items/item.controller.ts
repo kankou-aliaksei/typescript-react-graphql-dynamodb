@@ -1,6 +1,6 @@
 import { RootLogger } from 'loglevel';
-import { ErrorResponse, Response } from '../../shared/api.interfaces';
-import { ResponseBuilder } from '../../shared/response-builder';
+import { ErrorResponse, Response } from '../shared/api.interfaces';
+import { ResponseBuilder } from '../shared/response-builder';
 import { DeleteItemInput, GetItemInput, ItemDto, ListItemInput, ListItemOutput } from './item.dto';
 import { ItemService } from './item.service';
 import { ItemValidator } from './item.validator';

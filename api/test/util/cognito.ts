@@ -1,5 +1,6 @@
+import { AmazonCognitoSrp } from 'amazon-cognito-srp';
+import { AuthResult, Options } from 'amazon-cognito-srp/lib/types';
 import * as AWS from 'aws-sdk';
-import { getAuthToken } from './token';
 
 const cognitoIdp: AWS.CognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider();
 const ssm: AWS.SSM = new AWS.SSM();
@@ -43,6 +44,17 @@ export class Cognito {
       Username: this.username
     }).promise();
 
-    return getAuthToken(this.userPoolId, clientId, this.username, this.password);
+    const options: Options = {
+      clientId,
+      password: this.password,
+      userPoolId: this.userPoolId,
+      username: this.username
+    };
+
+    const amazonCognitoSrp: AmazonCognitoSrp = new AmazonCognitoSrp(options);
+
+    const authResult: AuthResult = await amazonCognitoSrp.authenticate();
+
+    return authResult.accessToken;
   }
 }

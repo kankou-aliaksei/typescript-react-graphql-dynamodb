@@ -1,5 +1,5 @@
-import { ErrorResponse } from '../../shared/api.interfaces';
-import { ResponseBuilder } from '../../shared/response-builder';
+import { ErrorResponse } from '../shared/api.interfaces';
+import { ResponseBuilder } from '../shared/response-builder';
 import { DeleteItemInput, GetItemInput, ItemDto, ListItemInput } from './item.dto';
 
 export class ItemValidator {

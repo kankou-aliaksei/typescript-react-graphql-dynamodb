@@ -14,7 +14,7 @@ import { ConfigurationServicePlaceholders } from 'aws-sdk/lib/config_service_pla
 import chai from 'chai';
 import deepEqualInAnyOrder from 'deep-equal-in-any-order';
 import { createTables, deleteTables } from 'jest-dynalite';
-import { Request, Response, ResponseWithResult } from '../../shared/api.interfaces';
+import { Request, Response, ResponseWithResult } from '../shared/api.interfaces';
 import { deleteItem, getItem, listItem, saveItem } from './item';
 import { DeleteItemInput, GetItemInput, ItemDto, ListItemInput, ListItemOutput } from './item.dto';
 

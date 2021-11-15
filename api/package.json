@@ -43,6 +43,7 @@
     "@types/uuid": "^8.3.1",
     "amazon-cognito-identity-js": "^5.2.2",
     "amazon-cognito-identity-js-node": "^0.0.3",
+    "amazon-cognito-srp": "^1.0.0",
     "amazon-user-pool-srp-client": "^1.0.4",
     "aws-amplify-serverless-plugin": "^1.4.1",
     "aws-sdk": "^2.1022.0",

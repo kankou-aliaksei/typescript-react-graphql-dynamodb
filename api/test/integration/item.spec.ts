@@ -2,8 +2,8 @@ import * as AWS from 'aws-sdk';
 import { expect } from 'chai';
 import { gql, GraphQLClient } from 'graphql-request';
 import { RequestDocument } from 'graphql-request/dist/types';
-import { ResponseWithResult } from '../../shared/api.interfaces';
 import { ItemDto } from '../../src/items/item.dto';
+import { ResponseWithResult } from '../../src/shared/api.interfaces';
 import { Cognito } from '../util/cognito';
 import { DeleteItemResponse, GetItemResponse, SaveItemResponse } from './item.model';
 

@@ -1,6 +1,3 @@
-# DEMO
-
-Demo is available: https://d3hmaq22obd6wq.cloudfront.net/
 
 # Prerequisites
 * Install Node.js v14
